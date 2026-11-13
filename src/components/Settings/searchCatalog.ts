@@ -1,5 +1,8 @@
+import { settings } from '~/logic'
+import { shouldShowBewlyTopBar } from '~/utils/bilibiliTopBar'
 import { isFirefoxBuild } from '~/utils/buildTarget'
 
+import { settingsMenus } from './settingsMenus'
 import { MenuType } from './types'
 
 export interface SettingsSearchStorageValue {
@@ -1009,3 +1012,24 @@ export const settingsSearchEntries: SettingsSearchEntry[] = baseSettingsSearchEn
     ?? (entry.titleKey ? fallbackTargetKeysByTitleKey[entry.titleKey] : undefined)
   return fallbackTargetKey ? { ...entry, fallbackTargetKey } : entry
 })
+
+/**
+ * 搜索条目当前是否可见：所在分类与二级页均可用，且 Bewly 页面 / Bewly 顶栏
+ * 专属项在对应模块关闭时隐藏。独立设置页与页面内浮层共用，保证两壳搜索行为一致。
+ */
+export function isSettingsSearchEntryVisible(entry: SettingsSearchEntry): boolean {
+  const menu = settingsMenus.find(item => item.value === entry.menu && (item.available?.() ?? true))
+  if (!menu)
+    return false
+  if (menu.pages && !menu.pages.some(page => page.available?.() ?? true))
+    return false
+  if (settings.value.useOriginalBilibiliHomepage && entry.titleKey && bewlyPagesOnlyTitleKeys.has(entry.titleKey))
+    return false
+  if (entry.titleKey && bewlyTopBarOnlyTitleKeys.has(entry.titleKey)
+    && !shouldShowBewlyTopBar(settings.value.enableTopBarModule, settings.value.enableTopBar, settings.value.useOriginalBilibiliTopBar)) {
+    return false
+  }
+
+  const secondaryPage = entry.storageValues?.find(({ key }) => key === menu.storageKey)?.value
+  return !secondaryPage || !menu.pages || menu.pages.some(page => page.value === secondaryPage && (page.available?.() ?? true))
+}

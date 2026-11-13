@@ -7,14 +7,13 @@ import type { SettingsMenu, SettingsNavigationTarget } from '~/composables/useAp
 import { useBewlyApp } from '~/composables/useAppProvider'
 import { USAGE_GUIDE_URL } from '~/constants/usageGuide'
 import { settings } from '~/logic'
-import { shouldShowBewlyTopBar } from '~/utils/bilibiliTopBar'
 import { buildSettingsPageHash } from '~/utils/settingsPage'
 
 import SettingsSectionHeading from './components/SettingsSectionHeading.vue'
 import { createPinnedChannelHistory, pinnedChannelHistoryKey } from './composables/usePinnedChannelHistory'
 import { useSettingsUrlSync } from './composables/useSettingsUrlSync'
 import type { SettingsSearchEntry } from './searchCatalog'
-import { bewlyPagesOnlyTitleKeys, bewlyTopBarOnlyTitleKeys, settingsSearchEntries } from './searchCatalog'
+import { isSettingsSearchEntryVisible, settingsSearchEntries } from './searchCatalog'
 import type { SettingsSecondaryPage } from './settingsMenus'
 import { settingsMenus } from './settingsMenus'
 import { MenuType } from './types'
@@ -239,22 +238,7 @@ interface SearchIndexEntry {
 }
 
 // 搜索文本只随 locale/目录变化重算，输入时复用，避免每次击键重复翻译全部条目。
-function isSearchEntryVisible(entry: SettingsSearchEntry) {
-  const menu = visibleMenus.value.find(item => item.value === entry.menu)
-  if (!menu)
-    return false
-  if (settings.value.useOriginalBilibiliHomepage && entry.titleKey && bewlyPagesOnlyTitleKeys.has(entry.titleKey))
-    return false
-  if (entry.titleKey && bewlyTopBarOnlyTitleKeys.has(entry.titleKey)
-    && !shouldShowBewlyTopBar(settings.value.enableTopBarModule, settings.value.enableTopBar, settings.value.useOriginalBilibiliTopBar)) {
-    return false
-  }
-
-  const secondaryPage = entry.storageValues?.find(({ key }) => key === menu.storageKey)?.value
-  return !secondaryPage || !menu.pages || menu.pages.some(page => page.value === secondaryPage)
-}
-
-const searchIndex = computed<SearchIndexEntry[]>(() => settingsSearchEntries.filter(isSearchEntryVisible).map((entry, order) => {
+const searchIndex = computed<SearchIndexEntry[]>(() => settingsSearchEntries.filter(isSettingsSearchEntryVisible).map((entry, order) => {
   const titleText = getSearchEntryTitle(entry).toLocaleLowerCase()
   const keywordText = getSearchEntryKeywordText(entry)
   return {
