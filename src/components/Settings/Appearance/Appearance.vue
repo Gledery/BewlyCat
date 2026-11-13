@@ -153,14 +153,6 @@ function changeWallpaper(url: string) {
 
     <SettingsItemGroup :title="$t('settings.group_visual_effects')">
       <SettingsItem
-        v-if="!settings.useOriginalBilibiliHomepage"
-        :title="$t('settings.sidebar_cover_blur')"
-        :desc="$t('settings.sidebar_cover_blur_desc')"
-        right-width="auto"
-      >
-        <Radio v-model="settings.enableSidebarCoverBlur" />
-      </SettingsItem>
-      <SettingsItem
         :title="$t('settings.enable_frosted_glass')"
         :badge="$t('settings.badge_performance_impact')"
         right-width="auto"
@@ -199,15 +191,13 @@ function changeWallpaper(url: string) {
       <SettingsItem :title="$t('settings.disable_shadow')" right-width="auto">
         <Radio v-model="settings.disableShadow" />
       </SettingsItem>
-    </SettingsItemGroup>
-
-    <SettingsItemGroup v-if="!settings.useOriginalBilibiliHomepage" :title="$t('settings.group_page_style')">
       <SettingsItem
-        :title="$t('settings.disable_background')"
-        :desc="$t('settings.disable_background_desc')"
+        v-if="!settings.useOriginalBilibiliHomepage"
+        :title="$t('settings.sidebar_cover_blur')"
+        :desc="$t('settings.sidebar_cover_blur_desc')"
         right-width="auto"
       >
-        <Radio v-model="settings.disableBackground" />
+        <Radio v-model="settings.enableSidebarCoverBlur" />
       </SettingsItem>
     </SettingsItemGroup>
 
@@ -340,6 +330,16 @@ function changeWallpaper(url: string) {
     </SettingsItemGroup>
 
     <ChangeWallpaper v-if="!settings.useOriginalBilibiliHomepage && !settings.disableBackground" type="global" />
+
+    <SettingsItemGroup v-if="!settings.useOriginalBilibiliHomepage" :title="$t('settings.group_page_style')">
+      <SettingsItem
+        :title="$t('settings.disable_background')"
+        :desc="$t('settings.disable_background_desc')"
+        right-width="auto"
+      >
+        <Radio v-model="settings.disableBackground" />
+      </SettingsItem>
+    </SettingsItemGroup>
 
     <SettingsItemGroup :title="$t('settings.group_fonts')">
       <SettingsItem :title="$t('settings.customize_font')" right-width="auto">
