@@ -31,10 +31,11 @@ import { setOriginalBilibiliTopBarScrolled, shouldShowOriginalBilibiliTopBar } f
 import { isFirefoxBuild } from '~/utils/buildTarget'
 import { SELECTION_FALLBACK_CLASS, supportsHighlightInheritance } from '~/utils/highlightInheritance'
 import { isHomePage, isInIframe, isNotificationPage, isSearchResultsPage, isVideoOrBangumiPage, jumpScrollTo, openLinkToNewTab, queryDomUntilFound, scrollToTop } from '~/utils/main'
+import { onMessage } from '~/utils/messaging'
 import emitter from '~/utils/mitt'
 import { navigateToPluginSearchResults } from '~/utils/searchNavigation'
 import { applyPendingSettingsMigrations, formatSettingsMigrationConfirmMessage, getPendingSettingsMigrationChoices, hasPendingSettingsMigrations } from '~/utils/settingsMigration'
-import { openSettingsPage } from '~/utils/settingsPage'
+import { OPEN_SETTINGS_OVERLAY_MESSAGE, requestOpenSettings, settingsOverlayTarget, settingsOverlayVisible } from '~/utils/settingsPage'
 import { isComponentVisible } from '~/utils/topBarBadge'
 import { canOpenInVideoDialog } from '~/utils/videoDialog'
 
@@ -47,6 +48,20 @@ useAccountSync()
 // Layout edit mode is UI-only; persistent choices continue to use `settings`.
 const { isLayoutEditing, exitLayoutEditMode } = useLayoutEditMode()
 const { t } = useI18n()
+
+// The top-bar switcher is teleported to document.body, outside this Shadow DOM.
+// Raise the host while the settings overlay is open so the modal can stay above that layer.
+watch(settingsOverlayVisible, (visible) => {
+  document.getElementById('bewly')?.classList.toggle('settings-open', visible)
+}, { immediate: true })
+
+// 工具栏图标由后台处理；开关开启时后台先请求页面弹出设置浮层。
+onMessage<SettingsNavigationTarget | undefined>(OPEN_SETTINGS_OVERLAY_MESSAGE, (target) => {
+  if (isInIframe())
+    return undefined
+  requestOpenSettings(target)
+  return true
+})
 
 // Conditionally use dark mode. `useDark()` handles the video-page-only route gate.
 let isDark: Ref<boolean>
@@ -531,7 +546,7 @@ function blockOriginalLayoutInteraction(event: Event) {
   if (event.type === 'click' && directTarget) {
     const menu = directTarget.dataset.layoutSettingsMenu as SettingsNavigationTarget['menu'] | undefined
     if (menu) {
-      openSettingsPage({
+      requestOpenSettings({
         menu,
         secondaryPage: directTarget.dataset.layoutSettingsPage,
         targetTitleKey: directTarget.dataset.layoutSettingsTitleKey,
@@ -546,7 +561,7 @@ function blockOriginalLayoutInteraction(event: Event) {
 }
 
 function openLayoutTargetSettings(target: LayoutEditTargetProxy) {
-  openSettingsPage({
+  requestOpenSettings({
     menu: target.menu,
     secondaryPage: target.secondaryPage,
     targetTitleKey: target.targetTitleKey,
@@ -825,7 +840,7 @@ function openLayoutEditPageModeSettings() {
   if (!dockPage)
     return
 
-  openSettingsPage({
+  requestOpenSettings({
     menu: 'BewlyComponents',
     secondaryPage: 'dock',
     targetTitleKey: dockPage.i18nKey,
@@ -834,7 +849,7 @@ function openLayoutEditPageModeSettings() {
 
 function openLayoutEditGridSettings() {
   if (layoutEditGridActionKind.value === 'moments') {
-    openSettingsPage({
+    requestOpenSettings({
       menu: 'BewlyPages',
       secondaryPage: 'moments',
       targetTitleKey: 'settings.moments_grid_columns',
@@ -843,7 +858,7 @@ function openLayoutEditGridSettings() {
   }
 
   if (layoutEditGridActionKind.value === 'video-card') {
-    openSettingsPage({
+    requestOpenSettings({
       menu: 'BewlyComponents',
       secondaryPage: 'video-card',
       targetTitleKey: 'settings.grid_breakpoints',
@@ -852,7 +867,7 @@ function openLayoutEditGridSettings() {
 }
 
 function openLayoutEditDockPositionSettings() {
-  openSettingsPage({
+  requestOpenSettings({
     menu: 'BewlyComponents',
     secondaryPage: 'dock',
     targetTitleKey: 'settings.dock_position',
@@ -860,7 +875,7 @@ function openLayoutEditDockPositionSettings() {
 }
 
 function openLayoutEditTopBarModeSettings() {
-  openSettingsPage({
+  requestOpenSettings({
     menu: 'BewlyComponents',
     secondaryPage: 'topbar',
     targetTitleKey: 'topbar.top_bar_switcher',
@@ -868,7 +883,7 @@ function openLayoutEditTopBarModeSettings() {
 }
 
 function openLayoutEditSearchResultsSettings() {
-  openSettingsPage({
+  requestOpenSettings({
     menu: 'BewlyPages',
     secondaryPage: 'search',
     targetTitleKey: 'settings.group_search_results',
@@ -876,7 +891,7 @@ function openLayoutEditSearchResultsSettings() {
 }
 
 function openLayoutEditContextSettings(action: LayoutEditQuickSettingsAction) {
-  openSettingsPage({
+  requestOpenSettings({
     menu: action.menu,
     secondaryPage: action.secondaryPage,
     targetTitleKey: action.targetTitleKey,
@@ -1688,7 +1703,7 @@ provide<BewlyAppProvider>('BEWLY_APP', {
   haveScrollbar,
   activeDrawer,
   setActiveDrawer,
-  openSettings: openSettingsPage,
+  openSettings: requestOpenSettings,
 })
 
 if (settings.value.cleanUrlArgument) {
@@ -1880,6 +1895,17 @@ if (settings.value.cleanUrlArgument) {
     <template v-if="showBewlyPage && !settings.disableBackground">
       <AppBackground :activated-page="activatedPage" @wallpaper-ready="pageWallpaperReady = $event" />
     </template>
+
+    <!-- Settings Overlay -->
+    <KeepAlive>
+      <SettingsOverlay
+        v-if="settingsOverlayVisible"
+        style="z-index: var(--bew-z-settings);"
+        :pending-navigation="settingsOverlayTarget"
+        @update:pending-navigation="settingsOverlayTarget = $event"
+        @close="settingsOverlayVisible = false"
+      />
+    </KeepAlive>
 
     <Transition name="fade">
       <svg
