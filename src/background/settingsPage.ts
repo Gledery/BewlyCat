@@ -2,12 +2,14 @@ import type { Tabs } from 'webextension-polyfill'
 import browser from 'webextension-polyfill'
 
 import type { SettingsNavigationTarget } from '~/composables/useAppProvider'
+import { settings } from '~/logic'
 import { onMessage } from '~/utils/messaging'
 import type { BilibiliTabRequest, SettingsPageTabLocation } from '~/utils/settingsPage'
 import {
   BILIBILI_TAB_REQUEST_MESSAGE,
   buildSettingsPageHash,
   NAVIGATE_SETTINGS_PAGE_MESSAGE,
+  OPEN_SETTINGS_OVERLAY_MESSAGE,
   OPEN_SETTINGS_PAGE_MESSAGE,
   SETTINGS_PAGE_PATH,
 } from '~/utils/settingsPage'
@@ -107,6 +109,12 @@ async function forwardToRecentBilibiliTab(request: BilibiliTabRequest) {
 export function setupSettingsPage() {
   // 工具栏图标不依赖页面上的任何功能开关，关闭 Dock 等组件后仍能进入设置。
   browser.action.onClicked.addListener((tab) => {
+    // 开启设置浮层时优先让当前页面弹出浮层；页面无法接收时回退独立设置页。
+    if (settings.value.enableSettingsOverlay && tab.id !== undefined) {
+      browser.tabs.sendMessage(tab.id, { type: OPEN_SETTINGS_OVERLAY_MESSAGE, data: undefined })
+        .catch(() => { void openSettingsPage(undefined, tab) })
+      return
+    }
     void openSettingsPage(undefined, tab)
   })
   onMessage<SettingsNavigationTarget | undefined>(OPEN_SETTINGS_PAGE_MESSAGE, (target, sender) =>
