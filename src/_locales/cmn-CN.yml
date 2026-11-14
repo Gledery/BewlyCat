@@ -500,6 +500,8 @@ settings:
   touch_screen_optimization: 触屏体验改进
   touch_screen_optimization_desc: |
     启用后，如顶栏，你可能需要点击项目以查看更多信息，而不是鼠标直接悬停查看。视频页支持双击播放、暂停或快进快退，按住左右滑动调整播放进度，以及从播放器左右边缘上下滑动调节音量。（旧版顶栏不支持此功能）
+  enable_settings_overlay: 使用设置浮层窗口
+  enable_settings_overlay_desc: 在页面内以浮层窗口打开设置；关闭后改为打开独立设置页。
   show_home_button_in_touch_mode: 显示 Home 按钮
   show_home_button_in_touch_mode_desc: 在触屏优化开启时，在顶栏 Logo 旁边显示一个可以直接跳转到首页的按钮。
   open_top_bar_items_in_bewly: 点击顶栏图标打开 Bewly 页面

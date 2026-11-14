@@ -507,6 +507,8 @@ settings:
     supported by the old top bar.) On video pages, double-tap to play, pause, or
     seek, drag horizontally to scrub through the video, and swipe vertically
     from either player edge to adjust volume.
+  enable_settings_overlay: Use the settings overlay window
+  enable_settings_overlay_desc: Open settings as an in-page overlay window; when off, settings open in a standalone page instead.
   show_home_button_in_touch_mode: Show Home button
   show_home_button_in_touch_mode_desc: When touch screen optimization is enabled, show a Home button next to the top bar Logo to navigate directly to the homepage.
   open_top_bar_items_in_bewly: Open Bewly pages from top bar icons

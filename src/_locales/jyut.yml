@@ -528,6 +528,8 @@ settings:
   touch_screen_optimization: 觸控螢幕體驗改進
   touch_screen_optimization_desc: |
     呢個設定開咗之後，好似頂欄噉，撳咗啲嘢先至可以睇到更多嘅資料，而唔係淨係靠游標懸停就睇到。影片頁支援雙擊播放、暫停或者快進快退，撳住左右滑動調整播放進度，同埋由播放器左右邊緣上下滑動調整音量。（舊版頂欄唔支援呢個功能）
+  enable_settings_overlay: 使用設定浮層視窗
+  enable_settings_overlay_desc: 喺頁面內以浮層視窗打開設定；熄咗之後就會改為打開獨立設定頁。
   show_home_button_in_touch_mode: 顯示 Home 掣
   show_home_button_in_touch_mode_desc: 喺觸控螢幕優化開咗嗰陣，喺頂欄 Logo 隔籬顯示一個可以直接跳去首頁嘅掣。
   open_top_bar_items_in_bewly: 撳頂欄圖示打開 Bewly 頁面

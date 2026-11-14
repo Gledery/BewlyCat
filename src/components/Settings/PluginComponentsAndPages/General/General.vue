@@ -60,6 +60,9 @@ watch(() => settings.value.language, (newValue) => {
       <SettingsItem :title="$t('settings.touch_screen_optimization')" :desc="$t('settings.touch_screen_optimization_desc')" right-width="auto">
         <Radio v-model="settings.touchScreenOptimization" />
       </SettingsItem>
+      <SettingsItem :title="$t('settings.enable_settings_overlay')" :desc="$t('settings.enable_settings_overlay_desc')" right-width="auto">
+        <Radio v-model="settings.enableSettingsOverlay" />
+      </SettingsItem>
     </SettingsItemGroup>
 
     <ModuleSettings />

@@ -332,6 +332,7 @@ export interface Settings {
   localLoudnessTarget: number
   localLoudnessStrength: number
   touchScreenOptimization: boolean
+  enableSettingsOverlay: boolean
   showHomeButtonInTouchMode: boolean
   openTopBarItemsInBewly: boolean
   enableGridLayoutSwitcher: boolean
@@ -727,6 +728,7 @@ export const originalSettings: Settings = {
   localLoudnessTarget: -18,
   localLoudnessStrength: 75,
   touchScreenOptimization: false,
+  enableSettingsOverlay: false,
   showHomeButtonInTouchMode: true,
   openTopBarItemsInBewly: true,
   enableGridLayoutSwitcher: true,

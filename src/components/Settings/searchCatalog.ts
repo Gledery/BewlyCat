@@ -270,6 +270,7 @@ const baseSettingsSearchEntries: SettingsSearchEntry[] = [
     'settings.select_language',
     'settings.group_interaction',
     'settings.touch_screen_optimization',
+    'settings.enable_settings_overlay',
   ]),
   ...createEntries(interactionRoute, [
     'settings.plugin.interaction',
