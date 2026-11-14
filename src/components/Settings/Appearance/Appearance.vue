@@ -122,6 +122,12 @@ watch(() => settings.value.wallpaper, (newValue) => {
   changeWallpaper(newValue)
 })
 
+// 插件页面和视频页玻璃风格共用同一套壁纸与渐变设置，两者任一生效都要保留入口。
+const showGlobalBackgroundSettings = computed(() => {
+  return (!settings.value.useOriginalBilibiliHomepage && !settings.value.disableBackground)
+    || settings.value.videoPageGlassStyle
+})
+
 function changeThemeColor(color: string) {
   settings.value.themeColor = color
 }
@@ -306,7 +312,7 @@ function changeWallpaper(url: string) {
         </div>
       </SettingsItem>
 
-      <SettingsItem v-if="!settings.useOriginalBilibiliHomepage && !settings.disableBackground" :title="$t('settings.gradient_theme_color_background')" right-width="auto">
+      <SettingsItem v-if="showGlobalBackgroundSettings" :title="$t('settings.gradient_theme_color_background')" right-width="auto">
         <Radio v-model="settings.useLinearGradientThemeColorBackground" />
       </SettingsItem>
       <SettingsItem
@@ -329,15 +335,34 @@ function changeWallpaper(url: string) {
       </SettingsItem>
     </SettingsItemGroup>
 
-    <ChangeWallpaper v-if="!settings.useOriginalBilibiliHomepage && !settings.disableBackground" type="global" />
+    <ChangeWallpaper v-if="showGlobalBackgroundSettings" type="global" />
 
-    <SettingsItemGroup v-if="!settings.useOriginalBilibiliHomepage" :title="$t('settings.group_page_style')">
+    <SettingsItemGroup :title="$t('settings.group_page_style')">
       <SettingsItem
+        v-if="!settings.useOriginalBilibiliHomepage"
         :title="$t('settings.disable_background')"
         :desc="$t('settings.disable_background_desc')"
         right-width="auto"
       >
         <Radio v-model="settings.disableBackground" />
+      </SettingsItem>
+      <SettingsItem
+        :title="$t('settings.video_page_glass_style')"
+        :badge="$t('settings.badge_performance_impact')"
+        right-width="auto"
+      >
+        <template #desc>
+          <span>{{ $t('settings.video_page_glass_style_desc') }}</span>
+          <span block class="bew-warning-text">{{ $t('common.performance_impact_warn') }}</span>
+        </template>
+        <Radio v-model="settings.videoPageGlassStyle" />
+      </SettingsItem>
+      <SettingsItem
+        :title="$t('settings.rounded_video_player')"
+        :desc="$t('settings.rounded_video_player_desc')"
+        right-width="auto"
+      >
+        <Radio v-model="settings.roundedVideoPlayer" />
       </SettingsItem>
     </SettingsItemGroup>
 

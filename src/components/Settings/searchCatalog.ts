@@ -258,6 +258,12 @@ export const bewlyPagesOnlyTitleKeys = new Set([
   'settings.enable_horizontal_scrolling',
 ])
 
+/** 视频页玻璃风格同样使用这些外观设置；开启后不随 Bewly 页面一起隐藏。 */
+export const videoPageBackgroundTitleKeys = new Set([
+  ...wallpaperTitleKeys,
+  'settings.gradient_theme_color_background',
+])
+
 /** 只在 Bewly 顶栏中生效；关闭 Bewly 顶栏后从搜索结果中隐藏。 */
 export const bewlyTopBarOnlyTitleKeys = new Set([
   'settings.top_bar_link_opening_behavior',
@@ -782,6 +788,8 @@ const baseSettingsSearchEntries: SettingsSearchEntry[] = [
     'settings.disable_shadow',
     'settings.group_page_style',
     'settings.disable_background',
+    'settings.video_page_glass_style',
+    'settings.rounded_video_player',
     'settings.group_color',
     'settings.theme',
     'settings.theme_schedule',
@@ -1024,7 +1032,12 @@ export function isSettingsSearchEntryVisible(entry: SettingsSearchEntry): boolea
     return false
   if (menu.pages && !menu.pages.some(page => page.available?.() ?? true))
     return false
-  if (settings.value.useOriginalBilibiliHomepage && entry.titleKey && bewlyPagesOnlyTitleKeys.has(entry.titleKey))
+  // 视频页玻璃风格同样使用这些外观设置；开启后不随 Bewly 页面一起隐藏。
+  const usedByVideoPageGlassStyle = settings.value.videoPageGlassStyle
+    && entry.menu === MenuType.Appearance
+    && entry.titleKey !== undefined
+    && videoPageBackgroundTitleKeys.has(entry.titleKey)
+  if (settings.value.useOriginalBilibiliHomepage && entry.titleKey && bewlyPagesOnlyTitleKeys.has(entry.titleKey) && !usedByVideoPageGlassStyle)
     return false
   if (entry.titleKey && bewlyTopBarOnlyTitleKeys.has(entry.titleKey)
     && !shouldShowBewlyTopBar(settings.value.enableTopBarModule, settings.value.enableTopBar, settings.value.useOriginalBilibiliTopBar)) {
